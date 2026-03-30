@@ -293,7 +293,7 @@
                             <!-- an error submitting the form-->
                             <div class="d-none" id="submitErrorMessage"><div class="text-center text-danger mb-3">发送失败，请稍后重试</div></div>
                             <!-- Submit Button-->
-                            <div class="d-grid"><button class="btn btn-primary btn-lg disabled" id="submitButton" type="submit">Submit</button></div>
+                            <div class="d-grid"><button class="btn btn-primary btn-lg" id="submitButton" type="submit">提交</button></div>
                         </form>
                     </div>
                 </div>
@@ -312,5 +312,92 @@
         <!-- * * Activate your form at https://startbootstrap.com/solution/contact-forms * *-->
         <!-- * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * *-->
         <!-- FormSubmit 已完成配置，无需额外脚本 -->
+
+        <!-- 表单提交处理脚本 -->
+        <script>
+            document.addEventListener('DOMContentLoaded', function() {
+                const form = document.getElementById('contactForm');
+                const submitButton = document.getElementById('submitButton');
+                const successMessage = document.getElementById('submitSuccessMessage');
+                const errorMessage = document.getElementById('submitErrorMessage');
+                const inputs = form.querySelectorAll('input[required], textarea[required]');
+                
+                // 验证表单
+                function validateForm() {
+                    let isValid = true;
+                    inputs.forEach(input => {
+                        if (!input.value.trim()) {
+                            isValid = false;
+                            input.classList.add('is-invalid');
+                        } else {
+                            input.classList.remove('is-invalid');
+                            input.classList.add('is-valid');
+                        }
+                    });
+                    
+                    // 验证邮箱格式
+                    const emailInput = document.getElementById('email');
+                    if (emailInput && emailInput.value) {
+                        const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+                        if (!emailRegex.test(emailInput.value)) {
+                            isValid = false;
+                            emailInput.classList.add('is-invalid');
+                        }
+                    }
+                    
+                    submitButton.disabled = !isValid;
+                    return isValid;
+                }
+                
+                // 监听输入变化
+                inputs.forEach(input => {
+                    input.addEventListener('input', validateForm);
+                    input.addEventListener('blur', validateForm);
+                });
+                
+                // 表单提交
+                form.addEventListener('submit', function(e) {
+                    e.preventDefault();
+                    
+                    if (!validateForm()) return;
+                    
+                    submitButton.disabled = true;
+                    submitButton.textContent = '提交中...';
+                    
+                    const formData = new FormData(form);
+                    
+                    fetch(form.action, {
+                        method: 'POST',
+                        body: formData,
+                        headers: {
+                            'Accept': 'application/json'
+                        }
+                    })
+                    .then(response => {
+                        if (response.ok) {
+                            form.reset();
+                            successMessage.classList.remove('d-none');
+                            errorMessage.classList.add('d-none');
+                            submitButton.textContent = '提交';
+                            inputs.forEach(input => {
+                                input.classList.remove('is-valid', 'is-invalid');
+                            });
+                        } else {
+                            throw new Error('提交失败');
+                        }
+                    })
+                    .catch(error => {
+                        console.error('Error:', error);
+                        errorMessage.classList.remove('d-none');
+                        successMessage.classList.add('d-none');
+                        submitButton.disabled = false;
+                        submitButton.textContent = '提交';
+                    });
+                });
+                
+                // 初始验证
+                validateForm();
+            });
+        </script>
     </body>
 </html>
