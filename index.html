@@ -252,7 +252,8 @@
             <input type="hidden" name="_captcha" value="false">
             <input type="hidden" name="_subject" value="新联系表单提交 - 天道恒通文化传媒">
             <input type="hidden" name="_template" value="table">
-            <input type="hidden" name="_next" value="https://yehecao.github.io/startbootstrap-business-frontpage/">
+            <input type="hidden" name="_next" value="https://yehecao.github.io/startbootstrap-business-frontpage/thanks.html">
+            <input type="hidden" name="_autoresponse" value="我们已收到您的消息，将尽快回复您。">
             <input type="text" name="_honey" style="display:none">
                             <!-- Name input-->
                             <div class="form-floating mb-3">
@@ -372,10 +373,12 @@
                         method: 'POST',
                         body: formData,
                         headers: {
-                            'Accept': 'application/json'
+                            'Accept': 'application/json',
+                            'Content-Type': 'application/x-www-form-urlencoded'
                         }
                     })
                     .then(response => {
+                        console.log('Response status:', response.status);
                         if (response.ok) {
                             form.reset();
                             successMessage.classList.remove('d-none');
@@ -384,12 +387,19 @@
                             inputs.forEach(input => {
                                 input.classList.remove('is-valid', 'is-invalid');
                             });
+                            // 3 秒后隐藏成功消息
+                            setTimeout(() => {
+                                successMessage.classList.add('d-none');
+                            }, 5000);
                         } else {
-                            throw new Error('提交失败');
+                            return response.text().then(text => {
+                                throw new Error('服务器响应错误：' + response.status + ' - ' + text.substring(0, 100));
+                            });
                         }
                     })
                     .catch(error => {
-                        console.error('Error:', error);
+                        console.error('Submit error:', error);
+                        errorMessage.innerHTML = '<div class="text-center text-danger mb-3">发送失败：' + error.message + '</div>';
                         errorMessage.classList.remove('d-none');
                         successMessage.classList.add('d-none');
                         submitButton.disabled = false;
