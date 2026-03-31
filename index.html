@@ -252,7 +252,7 @@
             <input type="hidden" name="_captcha" value="false">
             <input type="hidden" name="_subject" value="新联系表单提交 - 天道恒通文化传媒">
             <input type="hidden" name="_template" value="table">
-            <input type="hidden" name="_next" value="https://yehecao.github.io/startbootstrap-business-frontpage/">
+            <input type="hidden" name="_next" value="https://yehecao.github.io/startbootstrap-business-frontpage/thanks.html">
             <input type="text" name="_honey" style="display:none">
                             <!-- Name input-->
                             <div class="form-floating mb-3">
@@ -357,44 +357,21 @@
                     input.addEventListener('blur', validateForm);
                 });
                 
-                // 表单提交
+                // 表单提交 - 使用原生提交，不阻止默认行为
+                // 这样 FormSubmit 可以正常处理并重定向到感谢页面
                 form.addEventListener('submit', function(e) {
-                    e.preventDefault();
+                    // 只做验证，不阻止提交
+                    if (!validateForm()) {
+                        e.preventDefault();
+                        return;
+                    }
                     
-                    if (!validateForm()) return;
-                    
+                    // 禁用按钮防止重复提交
                     submitButton.disabled = true;
                     submitButton.textContent = '提交中...';
                     
-                    const formData = new FormData(form);
-                    
-                    fetch(form.action, {
-                        method: 'POST',
-                        body: formData,
-                        headers: {
-                            'Accept': 'application/json'
-                        }
-                    })
-                    .then(response => {
-                        if (response.ok) {
-                            form.reset();
-                            successMessage.classList.remove('d-none');
-                            errorMessage.classList.add('d-none');
-                            submitButton.textContent = '提交';
-                            inputs.forEach(input => {
-                                input.classList.remove('is-valid', 'is-invalid');
-                            });
-                        } else {
-                            throw new Error('提交失败');
-                        }
-                    })
-                    .catch(error => {
-                        console.error('Error:', error);
-                        errorMessage.classList.remove('d-none');
-                        successMessage.classList.add('d-none');
-                        submitButton.disabled = false;
-                        submitButton.textContent = '提交';
-                    });
+                    // 让表单正常提交到 FormSubmit
+                    // 成功后会跳转到 _next 指定的页面
                 });
                 
                 // 初始验证
